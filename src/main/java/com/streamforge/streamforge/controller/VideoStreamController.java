@@ -20,7 +20,7 @@ import java.util.Optional;
 import io.swagger.v3.oas.annotations.Parameter;
 
 
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/videos")
 public class VideoStreamController {
