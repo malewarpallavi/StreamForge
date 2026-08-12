@@ -45,4 +45,13 @@ public class FileStorageService
         int dot = filename.lastIndexOf('.');
         return dot == -1 ? "" : filename.substring(dot);
     }
+
+    public void delete(String fileName) {
+        try {
+            Path filePath = load(fileName);
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete file", e);
+        }
+    }
 }

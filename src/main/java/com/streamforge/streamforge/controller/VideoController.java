@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,20 @@ public class VideoController
     {
         this.videoRepository = videoRepository;
         this.fileStorageService = fileStorageService;
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteVideo(@PathVariable Long id) {
+        Optional<Video> videoOpt = videoRepository.findById(id);
+        if (videoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Video video = videoOpt.get();
+        fileStorageService.delete(video.getFileName()); // deletes the file
+        videoRepository.deleteById(id);                 // deletes the DB row
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
