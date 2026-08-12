@@ -1,0 +1,4 @@
+target/
+video-storage/
+.idea/
+*.class
