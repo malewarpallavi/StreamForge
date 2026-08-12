@@ -13,12 +13,12 @@ function VideoList({ refreshTrigger, onSelectVideo }) {
     return (
         <div>
             <h2>Videos</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            <div className="video-grid">
                 {videos.map((video) => (
                     <div
                         key={video.id}
                         onClick={() => onSelectVideo(video.id)}
-                        style={{ border: '1px solid #ccc', padding: '1rem', cursor: 'pointer' }}
+                        className="video-card"
                     >
                         <h3>{video.title}</h3>
                         <p>{video.description}</p>

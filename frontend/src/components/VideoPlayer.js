@@ -5,7 +5,7 @@ function VideoPlayer({ videoId }) {
     if (!videoId) return null;
 
     return (
-        <div style={{ marginTop: '2rem' }}>
+        <div className="player-section">
             <h2>Now Playing</h2>
             <video controls width="600" src={getStreamUrl(videoId)}>
                 Your browser does not support the video tag.

@@ -35,7 +35,7 @@ function UploadVideo({ onUploadSuccess }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} style={{ marginBottom: '2rem' }}>
+        <form onSubmit={handleSubmit} className="upload-form">
             <h2>Upload Video</h2>
             <input
                 type="file"
