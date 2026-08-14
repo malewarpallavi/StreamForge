@@ -36,6 +36,11 @@ A full-stack video streaming platform built with Spring Boot 4, MySQL, and React
 3. `npm start`
 4. App available at `http://localhost:3000`
 
+## Database Design
+- **Videos** table stores core metadata
+- **WatchProgress** — one row per (user, video) pair, enforced by a unique constraint, updated via an upsert pattern to power resume-playback (similar to Netflix's "continue watching")
+- **Comments** — one-to-many relationship to Videos via a foreign key, demonstrating standard relational join queries
+
 ### API Endpoints
 | Method | Endpoint | Description |
 |---|---|---|
