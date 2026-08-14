@@ -1,5 +1,8 @@
 package com.streamforge.streamforge.controller;
 
+import com.streamforge.streamforge.model.Comment;
+import com.streamforge.streamforge.repository.CommentRepository;
+import java.util.List;
 import com.streamforge.streamforge.model.Video;
 import com.streamforge.streamforge.model.WatchProgress;
 import com.streamforge.streamforge.repository.VideoRepository;
@@ -15,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/videos")
@@ -24,13 +28,38 @@ public class VideoController
     private final VideoRepository videoRepository;
     private final FileStorageService fileStorageService;
     private final WatchProgressRepository watchProgressRepository;
+    private final CommentRepository commentRepository;
 
-    public VideoController(VideoRepository videoRepository, FileStorageService fileStorageService, WatchProgressRepository watchProgressRepository)
+    public VideoController(VideoRepository videoRepository, FileStorageService fileStorageService, WatchProgressRepository watchProgressRepository, CommentRepository commentRepository)
     {
         this.videoRepository = videoRepository;
         this.fileStorageService = fileStorageService;
         this.watchProgressRepository = watchProgressRepository;
+        this.commentRepository = commentRepository;
     }
+
+    @PostMapping("/{id}/comments")
+public ResponseEntity<Comment> addComment(
+        @PathVariable Long id,
+        @RequestParam String commenterName,
+        @RequestParam String text) {
+    Optional<Video> videoOpt = videoRepository.findById(id);
+    if (videoOpt.isEmpty()) {
+        return ResponseEntity.notFound().build();
+    }
+    Comment comment = Comment.builder()
+            .video(videoOpt.get())
+            .commenterName(commenterName)
+            .text(text)
+            .createdAt(LocalDateTime.now())
+            .build();
+    return ResponseEntity.ok(commentRepository.save(comment));
+}
+
+@GetMapping("/{id}/comments")
+public ResponseEntity<List<Comment>> getComments(@PathVariable Long id) {
+    return ResponseEntity.ok(commentRepository.findByVideoId(id));
+}
 
     @PostMapping("/{id}/progress")
     public ResponseEntity<WatchProgress> saveProgress(
