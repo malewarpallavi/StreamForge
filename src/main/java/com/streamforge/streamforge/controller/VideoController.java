@@ -1,7 +1,9 @@
 package com.streamforge.streamforge.controller;
 
 import com.streamforge.streamforge.model.Video;
+import com.streamforge.streamforge.model.WatchProgress;
 import com.streamforge.streamforge.repository.VideoRepository;
+import com.streamforge.streamforge.repository.WatchProgressRepository;
 import com.streamforge.streamforge.service.FileStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,15 +18,63 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api/videos")
+
 public class VideoController
 {
     private final VideoRepository videoRepository;
     private final FileStorageService fileStorageService;
+    private final WatchProgressRepository watchProgressRepository;
 
-    public VideoController(VideoRepository videoRepository, FileStorageService fileStorageService)
+    public VideoController(VideoRepository videoRepository, FileStorageService fileStorageService, WatchProgressRepository watchProgressRepository)
     {
         this.videoRepository = videoRepository;
         this.fileStorageService = fileStorageService;
+        this.watchProgressRepository = watchProgressRepository;
+    }
+
+    @PostMapping("/{id}/progress")
+    public ResponseEntity<WatchProgress> saveProgress(
+            @PathVariable Long id,
+            @RequestParam String userIdentifier,
+            @RequestParam Integer positionSeconds) {
+
+        Optional<Video> videoOpt = videoRepository.findById(id);
+        if (videoOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Optional<WatchProgress> existing =
+                watchProgressRepository.findByUserIdentifierAndVideoId(userIdentifier, id);
+
+        WatchProgress progress;
+        if (existing.isPresent()) {
+            // UPDATE path — row already exists for this user+video
+            progress = existing.get();
+            progress.setPositionSeconds(positionSeconds);
+            progress.setLastUpdated(LocalDateTime.now());
+        } else {
+            // INSERT path — first time this user has watched this video
+            progress = WatchProgress.builder()
+                    .video(videoOpt.get())
+                    .userIdentifier(userIdentifier)
+                    .positionSeconds(positionSeconds)
+                    .lastUpdated(LocalDateTime.now())
+                    .build();
+        }
+
+        return ResponseEntity.ok(watchProgressRepository.save(progress));
+    }
+
+    @GetMapping("/{id}/progress")
+    public ResponseEntity<WatchProgress> getProgress(
+            @PathVariable Long id,
+            @RequestParam String userIdentifier) {
+
+        Optional<WatchProgress> progress =
+                watchProgressRepository.findByUserIdentifierAndVideoId(userIdentifier, id);
+
+        return progress.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
